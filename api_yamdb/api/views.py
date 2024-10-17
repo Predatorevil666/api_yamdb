@@ -1,3 +1,5 @@
-from django.shortcuts import render
+from django.urls import include, path
+from rest_framework.routers import DefaultRouter
 
-# Create your views here.
+
+router_v1 = DefaultRouter()
