@@ -1,5 +1,7 @@
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils import timezone
 
 User = get_user_model()
 
@@ -55,9 +57,15 @@ class Title(models.Model):
     category = models.OneToOneField(
         Category,
         on_delete=models.SET_NULL,
+        blank=True,
         null=True,
         verbose_name='Категория'
     )
+
+    def clean(self):
+        super().clean()
+        if self.year > timezone.now().year:
+            raise ValidationError('Год выпуска не может быть в будущем!')
 
     class Meta:
         verbose_name = 'произведение'
