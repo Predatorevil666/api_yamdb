@@ -1,18 +1,13 @@
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
+from users.roles import Roles
 
 from users.constants import (
     EMAIL_LENGTH,
     ROLE_LENGTH,
     USERNAME_LENGTH,
 )
-
-ROLES = [
-    ('user', 'пользователь'),
-    ('moderator', 'модератор'),
-    ('admin', 'администратор'),
-]
 
 
 class User(AbstractUser):
@@ -45,8 +40,8 @@ class User(AbstractUser):
     )
     role = models.CharField(
         max_length=ROLE_LENGTH,
-        choices=ROLES,
-        default='user'
+        choices=Roles.choices,
+        default=Roles.USER
     )
 
     class Meta:
@@ -56,3 +51,18 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.username
+
+    @property
+    def is_admin(self):
+        """
+        Свойство,
+        которое проверяет, является ли пользователь администратором.
+        """
+        return self.role == Roles.ADMIN or self.is_staff
+
+    @property
+    def is_moderator(self):
+        """
+        Свойство, которое проверяет, является ли пользователь модератором.
+        """
+        return self.role == Roles.MODERATOR
