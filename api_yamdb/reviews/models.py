@@ -65,7 +65,9 @@ class Title(models.Model):
     def clean(self):
         super().clean()
         if self.year > timezone.now().year:
-            raise ValidationError('Год выпуска не может быть в будущем!')
+            raise ValidationError(
+                'Год выпуска не может быть больше текущего!'
+            )
 
     class Meta:
         verbose_name = 'произведение'
