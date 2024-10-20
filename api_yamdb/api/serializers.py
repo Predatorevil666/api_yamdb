@@ -79,7 +79,7 @@ class TitleReadSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Title
-        fields = ('__all__')
+        fields = '__all__'
 
 
 class TitleCreateSerializer(serializers.ModelSerializer):
@@ -95,7 +95,7 @@ class TitleCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Title
-        fields = ('__all__')
+        fields = '__all__'
 
 
 class UserSerializer(serializers.ModelSerializer):

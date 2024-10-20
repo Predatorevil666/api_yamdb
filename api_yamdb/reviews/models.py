@@ -54,7 +54,7 @@ class Title(models.Model):
         through='Genre_title',
         verbose_name='Жанр'
     )
-    category = models.OneToOneField(
+    category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
         blank=True,
@@ -133,7 +133,7 @@ class Review(models.Model):
     )
 
     class Meta:
-        ordering = ['-pub_date'],
+        ordering = ['-pub_date']
         verbose_name = 'отзыв'
         verbose_name_plural = 'Отзывы'
         constraints = [
@@ -168,7 +168,7 @@ class Comment(models.Model):
 
     class Meta:
         ordering = ['-pub_date']
-        verbose_name = 'комментрий'
+        verbose_name = 'комментарий'
         verbose_name_plural = 'Комментарии'
 
     def __str__(self):

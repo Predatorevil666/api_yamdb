@@ -43,7 +43,7 @@ User = get_user_model()
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     pagination_class = LimitOffsetPagination
-    permission_class = (IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly,)
+    permission_classes = (IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly,)
 
     def get_queryset(self):
         title = get_object_or_404(
@@ -57,8 +57,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
             Title,
             pk=self.kwargs['title_id']
         )
-        serializer.save(author=self.request.user,
-                        title=title)
+        serializer.save(author=self.request.user, title=title)
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -69,19 +68,16 @@ class CommentViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         review = get_object_or_404(
             Review,
-            pk=self.kwargs['review_id'],
-            title=set.kwargs['title_id']
+            pk=self.kwargs['review_id']
         )
         return review.comments.all()
 
     def perform_create(self, serializer):
         review = get_object_or_404(
             Review,
-            pk=self.kwargs['review_id'],
-            title=self.kwargs['title_id']
+            pk=self.kwargs['review_id']
         )
-        serializer.save(author=self.request.user,
-                        review=review)
+        serializer.save(author=self.request.user, review=review)
 
 
 class CategoryViewSet(CreateListDestroyViewSet):
@@ -101,6 +97,7 @@ class TitleViewSet(viewsets.ModelViewSet):
         rating=Avg('reviews__score')).order_by('name')
     permission_classes = (IsAdminOrReadOnly,)
     pagination_class = LimitOffsetPagination
+    
 
     def get_serializer_class(self):
         if self.action in ('list', 'retrieve'):
