@@ -1,8 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.db.models import Avg
-from django.urls import include, path
 from django.shortcuts import get_object_or_404
-from rest_framework import filters, viewsets, mixins
+from rest_framework import viewsets
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -39,50 +38,6 @@ from reviews.models import (
 
 
 User = get_user_model()
-
-
-class ReviewViewSet(viewsets.ModelViewSet):
-    serializer_class = ReviewSerializer
-    pagination_class = LimitOffsetPagination
-    permission_class = (IsAuthorOrReadOnly)
-
-    def get_queryset(self):
-        title = get_object_or_404(
-            Title,
-            pk=self.kwargs['title_id']
-        )
-        return title.reviews.all()
-
-    def perform_create(self, serializer):
-        title = get_object_or_404(
-            Title,
-            pk=self.kwargs['title_id']
-        )
-        serializer.save(author=self.request.user,
-                        title=title)
-
-
-class CommentViewSet(viewsets.ModelViewSet):
-    serializer_class = CommentSerializer
-    pagination_class = LimitOffsetPagination
-    permission_classes = (IsAuthorOrReadOnly)
-
-    def get_queryset(self):
-        review = get_object_or_404(
-            Review,
-            pk=self.kwargs['review_id'],
-            title=set.kwargs['title_id']
-        )
-        return review.comments.all()
-
-    def perform_create(self, serializer):
-        review = get_object_or_404(
-            Review,
-            pk=self.kwargs['review_id'],
-            title=self.kwargs['title_id']
-        )
-        serializer.save(author=self.request.user,
-                        review=review)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
