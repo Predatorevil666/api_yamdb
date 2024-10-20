@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.db.models import Avg
 from django.urls import include, path
 from django.shortcuts import get_object_or_404
@@ -22,6 +23,8 @@ from reviews.models import (
     Genre,
     Title
 )
+
+User = get_user_model()
 
 
 class CategoryViewSet(CreateListDestroyViewSet):

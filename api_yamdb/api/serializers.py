@@ -9,7 +9,7 @@ from reviews.models import (
     Title,
 )
 
-from users.models import User
+User = get_user_model()
 
 
 class CategorySerializer(serializers.ModelSerializer):
