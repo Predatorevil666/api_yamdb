@@ -13,7 +13,11 @@ class IsAdmin(permissions.BasePermission):
         Возвращает True, если пользователь аутентифицирован и является
         администратором (is_staff или is_admin).
         """
-        return request.user.is_authenticated and request.user.is_admin
+        return request.user.is_authenticated and (
+            request.user.is_staff
+            or request.user.is_superuser
+            or request.user.role == 'admin'
+        )
 
 
 class IsAdminOrReadOnly(permissions.BasePermission):

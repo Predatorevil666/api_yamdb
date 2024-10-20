@@ -9,6 +9,7 @@ from users.constants import (
     EMAIL_LENGTH,
     ROLE_LENGTH,
     USERNAME_LENGTH,
+    CONFIRMATION_LENGTH
 )
 
 
@@ -47,7 +48,12 @@ class User(AbstractUser):
         _('Роль'),
         max_length=ROLE_LENGTH,
         choices=Roles.choices,
-        default=Roles.USER
+        default=Roles.USER.value
+    )
+    confirmation_code = models.CharField(
+        max_length=CONFIRMATION_LENGTH,
+        blank=True,
+        default=''
     )
 
     class Meta:
@@ -63,13 +69,15 @@ class User(AbstractUser):
         Переопределенный метод сохранения для модели User.
 
         Автоматически устанавливает права доступа пользователя
-        в зависимости от его роли.
-        Если роль пользователя - ADMIN,
-        то устанавливает флаги is_staff и is_superuser в True.
-        Для всех остальных ролей эти флаги устанавливаются в False.
+        в зависимости от его роли и статуса суперпользователя.
+
+        - Если роль пользователя - ADMIN или
+        пользователь является суперпользователем, то устанавливает флаги
+        is_staff и is_superuser в True.
+        - Для всех остальных ролей эти флаги устанавливаются в False.
         """
 
-        if self.role == Roles.ADMIN:
+        if self.role == Roles.ADMIN.value or self.is_superuser:
             self.is_staff = True
             self.is_superuser = True
         else:
@@ -83,11 +91,11 @@ class User(AbstractUser):
         Свойство,
         которое проверяет, является ли пользователь администратором.
         """
-        return self.role == Roles.ADMIN or self.is_staff
+        return self.role == Roles.ADMIN.value or self.is_staff
 
     @property
     def is_moderator(self):
         """
         Свойство, которое проверяет, является ли пользователь модератором.
         """
-        return self.role == Roles.MODERATOR
+        return self.role == Roles.MODERATOR.value

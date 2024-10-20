@@ -1,4 +1,5 @@
 from django.urls import include, path
+from rest_framework.authtoken import views
 from rest_framework.routers import DefaultRouter
 
 from api.views import (
@@ -7,7 +8,9 @@ from api.views import (
     GenreViewSet,
     ReviewViewSet,
     TitleViewSet,
-    UserViewSet
+    UserViewSet,
+    SignupView,
+    CreateTokenView
 )
 
 router_v1 = DefaultRouter()
@@ -26,12 +29,17 @@ router_v1.register(
     basename='comment'
 )
 
+auth_urls = [
+    path("signup/", SignupView.as_view(), name="user-signup"),
+    path("token/", CreateTokenView.as_view(), name="token-generation"),
+]
+
 urls_v1 = [
     path('', include(router_v1.urls)),
-
+    path("auth/", include(auth_urls)),
+    path("api-token-auth/", views.obtain_auth_token),
 ]
 
 urlpatterns = [
     path('v1/', include(urls_v1)),
-
 ]
