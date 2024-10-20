@@ -1,6 +1,6 @@
 from rest_framework import filters, viewsets, mixins
 from rest_framework.pagination import LimitOffsetPagination
-from api.permissions import IsAuthorOrReadOnly
+from api.permissions import IsAuthorOrReadOnly, IsAdminOrReadOnly
 
 
 class CreateListDestroyViewSet(
@@ -10,7 +10,7 @@ class CreateListDestroyViewSet(
     viewsets.GenericViewSet
 ):
     """Общий класс для CategoryViewSet и GenreViewSet."""
-    permission_classes = (IsAuthorOrReadOnly)
+    permission_classes = (IsAdminOrReadOnly,)
     pagination_class = LimitOffsetPagination
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)

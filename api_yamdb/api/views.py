@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.filters import SearchFilter
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.renderers import JSONRenderer
@@ -43,7 +43,7 @@ User = get_user_model()
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     pagination_class = LimitOffsetPagination
-    permission_class = (IsAuthorOrReadOnly)
+    permission_class = (IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly,)
 
     def get_queryset(self):
         title = get_object_or_404(
@@ -64,7 +64,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     pagination_class = LimitOffsetPagination
-    permission_classes = (IsAuthorOrReadOnly)
+    permission_classes = (IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly,)
 
     def get_queryset(self):
         review = get_object_or_404(
@@ -87,17 +87,19 @@ class CommentViewSet(viewsets.ModelViewSet):
 class CategoryViewSet(CreateListDestroyViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    permission_classes = (IsAdminOrReadOnly,)
 
 
 class GenreViewSet(CreateListDestroyViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+    permission_classes = (IsAdminOrReadOnly,)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.annotate(
         rating=Avg('reviews__score')).order_by('name')
-    permission_classes = (IsAuthorOrReadOnly)
+    permission_classes = (IsAdminOrReadOnly,)
     pagination_class = LimitOffsetPagination
 
     def get_serializer_class(self):
