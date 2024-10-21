@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAuthenticatedOrReadOnly
@@ -10,6 +10,9 @@ from rest_framework.decorators import action
 from rest_framework.renderers import JSONRenderer
 from rest_framework.generics import CreateAPIView
 from rest_framework.status import HTTP_200_OK
+from rest_framework.response import Response
+from django_filters.rest_framework import DjangoFilterBackend
+
 
 from api.add_for_view import CreateListDestroyViewSet
 from api.permissions import (
@@ -44,6 +47,11 @@ class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     pagination_class = LimitOffsetPagination
     permission_classes = (IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly,)
+    http_method_names = ['get', 'post', 'delete', 'patch']
+
+    def put(self, request, *args, **kwargs):
+        return Response({"detail": "Method Not Allowed"},
+                        status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def get_queryset(self):
         title = get_object_or_404(
@@ -64,6 +72,11 @@ class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     pagination_class = LimitOffsetPagination
     permission_classes = (IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly,)
+    http_method_names = ['get', 'post', 'delete', 'patch']
+
+    def put(self, request, *args, **kwargs):
+        return Response({"detail": "Method Not Allowed"},
+                        status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def get_queryset(self):
         review = get_object_or_404(
@@ -97,6 +110,13 @@ class TitleViewSet(viewsets.ModelViewSet):
         rating=Avg('reviews__score')).order_by('name')
     permission_classes = (IsAdminOrReadOnly,)
     pagination_class = LimitOffsetPagination
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ('genre__slug',)
+    http_method_names = ['get', 'post', 'delete', 'patch']  # Исключаем PUT
+
+    def put(self, request, *args, **kwargs):
+        return Response({"detail": "Method Not Allowed"},
+                        status=status.HTTP_405_METHOD_NOT_ALLOWED)
     
 
     def get_serializer_class(self):
