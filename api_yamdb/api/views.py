@@ -2,8 +2,7 @@ from django.contrib.auth import get_user_model
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import (status,
-                            viewsets)
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import CreateAPIView
@@ -26,11 +25,13 @@ from api.serializers import (CategorySerializer,
                              SignupSerializer,
                              TitleCreateSerializer,
                              TitleReadSerializer,
-                             UserSerializer)
+                             UserSerializer
+                             )
 from reviews.models import (Category,
                             Genre,
                             Review,
-                            Title)
+                            Title
+                            )
 
 
 User = get_user_model()
