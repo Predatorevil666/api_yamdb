@@ -1,21 +1,13 @@
 from django.contrib.auth import get_user_model
-from django.shortcuts import get_object_or_404
 from django.contrib.auth.validators import UnicodeUsernameValidator
+from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext as _
-
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import AccessToken
 
 from api.utils import generate_confirmation_code, send_confirmation_email
-from reviews.models import (
-    Category,
-    Comment,
-    Genre,
-    Review,
-    Title,
-)
+from reviews.models import Category, Comment, Genre, Review, Title
 from users.constants import EMAIL_LENGTH, USERNAME_LENGTH
-
 
 User = get_user_model()
 

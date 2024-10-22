@@ -5,6 +5,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 from progress.bar import IncrementalBar
+
 from reviews.models import Category, Comment, Genre, Genre_title, Review, Title
 
 User = get_user_model()
