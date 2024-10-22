@@ -9,7 +9,8 @@ from api.views import (CategoryViewSet,
                        ReviewViewSet,
                        SignupView,
                        TitleViewSet,
-                       UserViewSet)
+                       UserViewSet,
+                       )
 
 router_v1 = DefaultRouter()
 router_v1.register('categories', CategoryViewSet, basename='categories')
