@@ -1,57 +1,43 @@
 from django.contrib.auth import get_user_model
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets, status
-from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.filters import SearchFilter
-from rest_framework.permissions import IsAuthenticated, AllowAny, IsAuthenticatedOrReadOnly
-from rest_framework.response import Response
-from rest_framework.decorators import action
-from rest_framework.renderers import JSONRenderer
-from rest_framework.generics import CreateAPIView
-from rest_framework.status import HTTP_200_OK
-from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import (status,
+                            viewsets)
+from rest_framework.decorators import action
+from rest_framework.filters import SearchFilter
+from rest_framework.generics import CreateAPIView
+from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.permissions import (AllowAny,
+                                        IsAuthenticated)
+from rest_framework.renderers import JSONRenderer
+from rest_framework.response import Response
 
-
-from api.add_for_view import CreateListDestroyViewSet
-from api.permissions import (
-    IsAdmin,
-    IsAdminOrReadOnly,
-    IsAuthorOrReadOnly
-)
-from api.serializers import (
-    CategorySerializer,
-    CommentSerializer,
-    GenreSerializer,
-    ReviewSerializer,
-    TitleCreateSerializer,
-    TitleReadSerializer,
-    UserSerializer,
-    SignupSerializer,
-    CreateTokenSerializer
-)
-
-from reviews.models import (
-    Category,
-    Genre,
-    Title,
-    Review
-)
+from api.filters import TitleFilter
+from api.mixins import (BaseViewSet,
+                        CreateListDestroyViewSet)
+from api.permissions import (IsAdmin,
+                             IsAdminOrReadOnly)
+from api.serializers import (CategorySerializer,
+                             CommentSerializer,
+                             CreateTokenSerializer,
+                             GenreSerializer,
+                             ReviewSerializer,
+                             SignupSerializer,
+                             TitleCreateSerializer,
+                             TitleReadSerializer,
+                             UserSerializer)
+from reviews.models import (Category,
+                            Genre,
+                            Review,
+                            Title)
 
 
 User = get_user_model()
 
 
-class ReviewViewSet(viewsets.ModelViewSet):
+class ReviewViewSet(BaseViewSet):
     serializer_class = ReviewSerializer
-    pagination_class = LimitOffsetPagination
-    permission_classes = (IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly,)
-    http_method_names = ['get', 'post', 'delete', 'patch']
-
-    def put(self, request, *args, **kwargs):
-        return Response({"detail": "Method Not Allowed"},
-                        status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def get_queryset(self):
         title = get_object_or_404(
@@ -68,15 +54,8 @@ class ReviewViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.user, title=title)
 
 
-class CommentViewSet(viewsets.ModelViewSet):
+class CommentViewSet(BaseViewSet):
     serializer_class = CommentSerializer
-    pagination_class = LimitOffsetPagination
-    permission_classes = (IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly,)
-    http_method_names = ['get', 'post', 'delete', 'patch']
-
-    def put(self, request, *args, **kwargs):
-        return Response({"detail": "Method Not Allowed"},
-                        status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def get_queryset(self):
         review = get_object_or_404(
@@ -96,13 +75,11 @@ class CommentViewSet(viewsets.ModelViewSet):
 class CategoryViewSet(CreateListDestroyViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = (IsAdminOrReadOnly,)
 
 
 class GenreViewSet(CreateListDestroyViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = (IsAdminOrReadOnly,)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -111,13 +88,12 @@ class TitleViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAdminOrReadOnly,)
     pagination_class = LimitOffsetPagination
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('genre__slug',)
-    http_method_names = ['get', 'post', 'delete', 'patch']  # Исключаем PUT
+    filterset_class = TitleFilter
+    http_method_names = ['get', 'post', 'delete', 'patch']
 
     def put(self, request, *args, **kwargs):
-        return Response({"detail": "Method Not Allowed"},
+        return Response({"detail": "Метод не разрешен"},
                         status=status.HTTP_405_METHOD_NOT_ALLOWED)
-    
 
     def get_serializer_class(self):
         if self.action in ('list', 'retrieve'):
@@ -166,8 +142,7 @@ class SignupView(CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-
-        return Response(serializer.data, status=HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class CreateTokenView(CreateAPIView):
@@ -181,4 +156,4 @@ class CreateTokenView(CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         token = serializer.save()
-        return Response({"token": token["access"]}, status=HTTP_200_OK)
+        return Response({"token": token["access"]}, status=status.HTTP_200_OK)

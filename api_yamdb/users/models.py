@@ -3,14 +3,13 @@ from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from users.roles import Roles
-
 from users.constants import (
+    CONFIRMATION_LENGTH,
     EMAIL_LENGTH,
     ROLE_LENGTH,
-    USERNAME_LENGTH,
-    CONFIRMATION_LENGTH
+    USERNAME_LENGTH
 )
+from users.roles import Roles
 
 
 class User(AbstractUser):

@@ -1,19 +1,20 @@
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils import timezone
+
+from reviews.constants import MAX_LENGTH, MAX_TEXT_LENGTH
+
 
 User = get_user_model()
 
 
-MAX_LENGTH: int = 256
-
-MAX_TEXT_LENGTH = 20
-
-
 class BaseModel(models.Model):
-    name = models.CharField(max_length=MAX_LENGTH, verbose_name='Наименование')
+    name = models.CharField(
+        max_length=MAX_LENGTH,
+        verbose_name='Наименование'
+    )
     slug = models.SlugField(
         max_length=50,
         verbose_name='Идентификатор',
@@ -116,7 +117,9 @@ class Review(models.Model):
         related_name='reviews',
         verbose_name='произведение'
     )
-    text = models.TextField(verbose_name='Отзыв')
+    text = models.TextField(
+        verbose_name='Отзыв'
+    )
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -154,7 +157,9 @@ class Comment(models.Model):
         related_name='comments',
         verbose_name='Отзыв'
     )
-    text = models.TextField(verbose_name='Комментарий')
+    text = models.TextField(
+        verbose_name='Комментарий'
+    )
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
