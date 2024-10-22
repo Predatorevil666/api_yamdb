@@ -4,7 +4,6 @@ import os
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
-from progress.bar import IncrementalBar
 
 from reviews.models import Category, Comment, Genre, Genre_title, Review, Title
 
@@ -93,19 +92,14 @@ action = {
 
 
 class Command(BaseCommand):
-    help = "Load test DB from dir (../static/data/)"
+    help = "Загрузить тестовую базу данных из директории (../static/data/)"
 
     def handle(self, *args, **options):
         for filename, row in action.items():
             path = os.path.join(settings.BASE_DIR, "static/data/") + filename
             with open(path, 'r', encoding='utf-8') as file:
-                row_count = sum(1 for row in file)
-            with open(path, 'r', encoding='utf-8') as file:
                 reader = csv.reader(file)
-                bar = IncrementalBar(filename.ljust(17), max=row_count)
                 next(reader)
                 for row in reader:
-                    bar.next()
                     action[filename](row)
-                bar.finish()
-        self.stdout.write("!!!The database has been loaded successfully!!!")
+        self.stdout.write("!!!База данных загружена успешно!!!")
