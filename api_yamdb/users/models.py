@@ -1,31 +1,32 @@
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
-from django.utils.translation import gettext_lazy as _
 
 from users.constants import (
     CONFIRMATION_LENGTH,
     EMAIL_LENGTH,
-    ROLE_LENGTH,
+    MAX_ROLE_LENGTH,
     USERNAME_LENGTH
 )
 from users.roles import Roles
+from users.validators import validate_username
 
 
 class User(AbstractUser):
     username = models.CharField(
-        _('Имя пользователя'),
+        'Имя пользователя',
         max_length=USERNAME_LENGTH,
         unique=True,
         error_messages={
-            'unique': _("Пользователь с таким именем уже существует."),
+            'unique': "Пользователь с таким именем уже существует.",
         },
         validators=[
             UnicodeUsernameValidator(),
+            validate_username,
         ],
     )
     email = models.EmailField(
-        _('Адрес электронной почты'),
+        'Адрес электронной почты',
         max_length=EMAIL_LENGTH,
         unique=True
     )
@@ -40,12 +41,12 @@ class User(AbstractUser):
 
     )
     bio = models.TextField(
-        _('Информация о пользователе'),
+        'Информация о пользователе',
         blank=True
     )
     role = models.CharField(
-        _('Роль'),
-        max_length=ROLE_LENGTH,
+        'Роль',
+        max_length=MAX_ROLE_LENGTH,
         choices=Roles.choices,
         default=Roles.USER.value
     )
@@ -79,9 +80,6 @@ class User(AbstractUser):
         if self.role == Roles.ADMIN.value or self.is_superuser:
             self.is_staff = True
             self.is_superuser = True
-        else:
-            self.is_staff = False
-            self.is_superuser = False
         super().save(*args, **kwargs)
 
     @property
@@ -90,7 +88,11 @@ class User(AbstractUser):
         Свойство,
         которое проверяет, является ли пользователь администратором.
         """
-        return self.role == Roles.ADMIN.value or self.is_staff
+        return self.role == (
+            Roles.ADMIN.value
+            or self.is_staff
+            or self.is_superuser
+        )
 
     @property
     def is_moderator(self):
