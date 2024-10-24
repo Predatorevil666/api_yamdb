@@ -3,8 +3,7 @@ from rest_framework.filters import SearchFilter
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
-from api.permissions import (IsAdminOrReadOnly,
-                             IsAuthorOrReadOnly)
+from api.permissions import IsAdminOrReadOnly, IsAuthorOrReadOnly
 
 
 class BaseViewSet(viewsets.ModelViewSet):

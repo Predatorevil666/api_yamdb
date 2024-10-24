@@ -1,13 +1,9 @@
 from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
 
-from users.constants import (
-    CONFIRMATION_LENGTH,
-    EMAIL_LENGTH,
-    MAX_ROLE_LENGTH,
-    USERNAME_LENGTH
-)
+from users.constants import CONFIRMATION_LENGTH, EMAIL_LENGTH, USERNAME_LENGTH
 from users.roles import Roles
 from users.validators import validate_username
 
@@ -46,7 +42,7 @@ class User(AbstractUser):
     )
     role = models.CharField(
         'Роль',
-        max_length=MAX_ROLE_LENGTH,
+        max_length=max(len(role.value) for role in Roles),
         choices=Roles.choices,
         default=Roles.USER.value
     )
@@ -100,3 +96,16 @@ class User(AbstractUser):
         Свойство, которое проверяет, является ли пользователь модератором.
         """
         return self.role == Roles.MODERATOR.value
+
+    @property
+    def generate_confirmation_token(self):
+        """
+        Генерирует токен подтверждения для пользователя.
+        """
+        return default_token_generator.make_token(self)
+
+    def check_confirmation_token(self, token):
+        """
+        Проверяет токен подтверждения для пользователя.
+        """
+        return default_token_generator.check_token(self, token)
