@@ -1,11 +1,12 @@
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from django.utils.translation import gettext_lazy as _
+from django.contrib.auth.models import Group
 
 User = get_user_model()
 
 
+@admin.register(User)
 class UserAdmin(BaseUserAdmin):
     list_display = (
         'username',
@@ -34,17 +35,17 @@ class UserAdmin(BaseUserAdmin):
             'username',
             'password'
         )}),
-        (_('Информация о пользователе'), {'fields': (
+        ('Информация о пользователе', {'fields': (
             'first_name',
             'last_name',
             'email',
             'bio',
         )}),
-        (_('Разрешения'), {'fields': (
+        ('Разрешения', {'fields': (
             'is_active',
             'role'
         )}),
-        (_('Активность'), {'fields': (
+        ('Активность', {'fields': (
             'last_login',
             'date_joined'
         )}),
@@ -64,4 +65,4 @@ class UserAdmin(BaseUserAdmin):
     )
 
 
-admin.site.register(User, UserAdmin)
+admin.site.unregister(Group)

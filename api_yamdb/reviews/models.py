@@ -3,14 +3,8 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils import timezone
 
-from reviews.constants import (
-    MAX_LENGTH,
-    MAX_TEXT_LENGTH,
-    MAX_LENGTH_SLUG,
-    MIN_SCORE,
-    MAX_SCORE
-)
-
+from reviews.constants import (MAX_LENGTH, MAX_LENGTH_SLUG, MAX_SCORE,
+                               MAX_TEXT_LENGTH, MIN_SCORE)
 
 User = get_user_model()
 
