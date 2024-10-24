@@ -1,13 +1,13 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.shortcuts import get_object_or_404
-from django.utils.translation import gettext as _
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import AccessToken
 
-from api.utils import generate_confirmation_code, send_confirmation_email
+from api.utils import send_confirmation_email
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.constants import EMAIL_LENGTH, USERNAME_LENGTH
+from users.validators import validate_username
 
 User = get_user_model()
 
@@ -67,7 +67,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 class TitleReadSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
     genre = GenreSerializer(many=True, read_only=True)
-    rating = serializers.IntegerField(read_only=True)
+    rating = serializers.IntegerField(read_only=True, default=None)
 
     class Meta:
         model = Title
@@ -82,6 +82,8 @@ class TitleCreateSerializer(serializers.ModelSerializer):
     genre = serializers.SlugRelatedField(
         many=True,
         slug_field='slug',
+        allow_null=False,
+        allow_empty=False,
         queryset=Genre.objects.all()
     )
 
@@ -111,33 +113,42 @@ class SignupSerializer(serializers.Serializer):
         max_length=USERNAME_LENGTH,
         validators=[
             UnicodeUsernameValidator(),
+            validate_username
         ],
         error_messages={
-            'blank': _('Это поле не может быть пустым.'),
-            'required': _('Это поле обязательно для заполнения.'),
-            'unique': _('Пользователь с таким именем уже существует.'),
+            'blank': 'Это поле не может быть пустым.',
+            'required': 'Это поле обязательно для заполнения.',
+            'unique': 'Пользователь с таким именем уже существует.',
         }
     )
     email = serializers.EmailField(
         max_length=EMAIL_LENGTH,
         error_messages={
-            'blank': _('Это поле не может быть пустым.'),
-            'required': _('Это поле обязательно для заполнения.'),
-            'unique': _('Пользователь с таким email уже существует.'),
-            'invalid': _('Введите действительный email адрес.'),
+            'blank': 'Это поле не может быть пустым.',
+            'required': 'Это поле обязательно для заполнения.',
+            'unique': 'Пользователь с таким email уже существует.',
+            'invalid': 'Введите действительный email адрес.',
         }
     )
 
     def validate(self, data):
-        if User.objects.filter(username=data.get('username'),
-                               email=data.get('email')).exists():
-            return data
-        if User.objects.filter(username=data.get('username')):
-            raise serializers.ValidationError(
-                'Данный пользователь уже существует!')
-        if User.objects.filter(email=data.get('email')):
-            raise serializers.ValidationError(
-                'Данная почта уже существует!')
+        username = data.get('username')
+        email = data.get('email')
+        errors = {}
+
+        user_by_username = User.objects.filter(username=username).first()
+        user_by_email = User.objects.filter(email=email).first()
+
+        if user_by_username and user_by_username.email != email:
+            errors['username'] = [
+                'Пользователь с таким именем уже существует.'
+            ]
+        if user_by_email and user_by_email.username != username:
+            errors['email'] = [
+                'Пользователь с такой почтой уже существует.'
+            ]
+        if errors:
+            raise serializers.ValidationError(errors)
         return data
 
     def create(self, validated_data):
@@ -149,19 +160,11 @@ class SignupSerializer(serializers.Serializer):
             username=username,
             email=email,
         )
-        confirmation_code = generate_confirmation_code()
+        confirmation_code = user.generate_confirmation_token
         user.confirmation_code = confirmation_code
-        user.save()
 
         send_confirmation_email(user.email, confirmation_code)
         return user
-
-    def validate_username(self, value):
-        if value.lower() == 'me':
-            raise serializers.ValidationError(
-                "Имя пользователя 'me' не разрешено."
-            )
-        return value
 
 
 class CreateTokenSerializer(serializers.Serializer):
@@ -176,7 +179,7 @@ class CreateTokenSerializer(serializers.Serializer):
 
         user = get_object_or_404(User, username=username)
 
-        if user.confirmation_code != confirmation_code:
+        if not user.check_confirmation_token(confirmation_code):
             raise serializers.ValidationError(
                 "Недействительный код подтверждения.")
 
