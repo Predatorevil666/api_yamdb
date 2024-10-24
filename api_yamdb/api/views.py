@@ -14,7 +14,7 @@ from rest_framework.response import Response
 
 from api.filters import TitleFilter
 from api.mixins import (BaseViewSet,
-                        CreateListDestroyViewSet)
+                        CategoryGenreViewSet)
 from api.permissions import (IsAdmin,
                              IsAdminOrReadOnly)
 from api.serializers import (CategorySerializer,
@@ -25,13 +25,11 @@ from api.serializers import (CategorySerializer,
                              SignupSerializer,
                              TitleCreateSerializer,
                              TitleReadSerializer,
-                             UserSerializer
-                             )
+                             UserSerializer)
 from reviews.models import (Category,
                             Genre,
                             Review,
-                            Title
-                            )
+                            Title)
 
 
 User = get_user_model()
@@ -40,45 +38,52 @@ User = get_user_model()
 class ReviewViewSet(BaseViewSet):
     serializer_class = ReviewSerializer
 
-    def get_queryset(self):
-        title = get_object_or_404(
+    def get_title(self):
+        """Получение произведения."""
+        return get_object_or_404(
             Title,
             pk=self.kwargs['title_id']
         )
+
+    def get_queryset(self):
+        """Получение отзывов на произведение."""
+        title = self.get_title()
         return title.reviews.all()
 
     def perform_create(self, serializer):
-        title = get_object_or_404(
-            Title,
-            pk=self.kwargs['title_id']
-        )
+        """Создание отзыва."""
+        title = self.get_title()
         serializer.save(author=self.request.user, title=title)
 
 
 class CommentViewSet(BaseViewSet):
     serializer_class = CommentSerializer
 
-    def get_queryset(self):
-        review = get_object_or_404(
+    def get_review(self):
+        """Получение отзыва."""
+        return get_object_or_404(
             Review,
-            pk=self.kwargs['review_id']
+            pk=self.kwargs['review_id'],
+            title=self.kwargs['title_id']
         )
+
+    def get_queryset(self):
+        """Получение комментариев по отзыву."""
+        review = self.get_review()
         return review.comments.all()
 
     def perform_create(self, serializer):
-        review = get_object_or_404(
-            Review,
-            pk=self.kwargs['review_id']
-        )
+        """Создание отзыва."""
+        review = self.get_review()
         serializer.save(author=self.request.user, review=review)
 
 
-class CategoryViewSet(CreateListDestroyViewSet):
+class CategoryViewSet(CategoryGenreViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
 
-class GenreViewSet(CreateListDestroyViewSet):
+class GenreViewSet(CategoryGenreViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
 
@@ -90,11 +95,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     pagination_class = LimitOffsetPagination
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
-    http_method_names = ['get', 'post', 'delete', 'patch']
-
-    def put(self, request, *args, **kwargs):
-        return Response({"detail": "Метод не разрешен"},
-                        status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    http_method_names = ('get', 'post', 'delete', 'patch')
 
     def get_serializer_class(self):
         if self.action in ('list', 'retrieve'):
