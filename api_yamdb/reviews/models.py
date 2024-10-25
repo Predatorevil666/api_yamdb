@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils import timezone
@@ -7,6 +8,13 @@ from reviews.constants import (MAX_LENGTH, MAX_LENGTH_SLUG, MAX_SCORE,
                                MAX_TEXT_LENGTH, MIN_SCORE)
 
 User = get_user_model()
+
+
+def validate_year(value):
+    """ Проверка, чтобы год не превышал текущий год. """
+    current_year = timezone.now().year
+    if value > current_year:
+        raise ValidationError(f'Год не может превышать {current_year}.')
 
 
 class BaseModel(models.Model):
@@ -55,17 +63,16 @@ class Title(models.Model):
 
     name = models.CharField(max_length=MAX_LENGTH, verbose_name='Название')
     year = models.SmallIntegerField(
-        validators=[MaxValueValidator(timezone.now().year)],
+        validators=[validate_year],
         verbose_name='Год выпуска'
     )
     description = models.TextField(
         blank=True,
-        null=True,
         verbose_name='Описание'
     )
     genre = models.ManyToManyField(
         Genre,
-        through='Genre_title',
+        through='GenreTitle',
         verbose_name='Жанр'
     )
     category = models.ForeignKey(
@@ -86,7 +93,7 @@ class Title(models.Model):
         return self.name[:MAX_TEXT_LENGTH]
 
 
-class Genre_title(models.Model):
+class GenreTitle(models.Model):
     """Модель связывает жанры и произведения."""
 
     title = models.ForeignKey(
@@ -148,7 +155,7 @@ class Review(models.Model):
     )
 
     class Meta:
-        ordering = ['-pub_date']
+        ordering = ('-pub_date',)
         verbose_name = 'отзыв'
         verbose_name_plural = 'Отзывы'
         constraints = [
@@ -186,7 +193,7 @@ class Comment(models.Model):
     )
 
     class Meta:
-        ordering = ['-pub_date']
+        ordering = ('-pub_date',)
         verbose_name = 'комментарий'
         verbose_name_plural = 'Комментарии'
 
