@@ -46,11 +46,6 @@ class User(AbstractUser):
         choices=Roles.choices,
         default=Roles.USER.value
     )
-    confirmation_code = models.CharField(
-        max_length=CONFIRMATION_LENGTH,
-        blank=True,
-        default=''
-    )
 
     class Meta:
         verbose_name = 'пользователь'

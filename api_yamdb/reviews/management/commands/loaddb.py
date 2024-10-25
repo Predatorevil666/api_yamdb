@@ -5,7 +5,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 
-from reviews.models import Category, Comment, Genre, Genre_title, Review, Title
+from reviews.models import Category, Comment, Genre, GenreTitle, Review, Title
 
 User = get_user_model()
 
@@ -73,7 +73,7 @@ def comment_create(row):
 def genre_title_create(row):
     title, _ = Title.objects.get_or_create(id=row[1])
     genre, _ = Genre.objects.get_or_create(id=row[2])
-    Genre_title.objects.get_or_create(
+    GenreTitle.objects.get_or_create(
         id=row[0],
         title=title,
         genre=genre,
