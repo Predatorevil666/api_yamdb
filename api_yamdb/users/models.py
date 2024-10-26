@@ -79,8 +79,8 @@ class User(AbstractUser):
         Свойство,
         которое проверяет, является ли пользователь администратором.
         """
-        return self.role == (
-            Roles.ADMIN.value
+        return (
+            self.role == (Roles.ADMIN.value)
             or self.is_staff
             or self.is_superuser
         )
