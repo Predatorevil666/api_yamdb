@@ -3,7 +3,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
 
-from users.constants import CONFIRMATION_LENGTH, EMAIL_LENGTH, USERNAME_LENGTH
+from users.constants import EMAIL_LENGTH, USERNAME_LENGTH
 from users.roles import Roles
 from users.validators import validate_username
 
