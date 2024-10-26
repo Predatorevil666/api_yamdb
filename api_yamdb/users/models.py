@@ -46,11 +46,6 @@ class User(AbstractUser):
         choices=Roles.choices,
         default=Roles.USER.value
     )
-    confirmation_code = models.CharField(
-        max_length=CONFIRMATION_LENGTH,
-        blank=True,
-        default=''
-    )
 
     class Meta:
         verbose_name = 'пользователь'
@@ -84,8 +79,8 @@ class User(AbstractUser):
         Свойство,
         которое проверяет, является ли пользователь администратором.
         """
-        return self.role == (
-            Roles.ADMIN.value
+        return (
+            self.role == (Roles.ADMIN.value)
             or self.is_staff
             or self.is_superuser
         )

@@ -91,6 +91,9 @@ class TitleCreateSerializer(serializers.ModelSerializer):
         model = Title
         fields = '__all__'
 
+    def to_representation(self, instance):
+        return TitleReadSerializer(instance).data
+
 
 class UserSerializer(serializers.ModelSerializer):
 

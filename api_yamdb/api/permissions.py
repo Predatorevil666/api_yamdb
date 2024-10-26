@@ -14,7 +14,7 @@ class IsAdmin(permissions.BasePermission):
         администратором (is_staff или is_admin).
         """
         return request.user.is_authenticated and (
-            request.user.is_admin or request.user.is_superuser
+            request.user.is_admin
         )
 
 
